@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     //hashed password
-    password: {
+    hashedPassword: {
         type: String,
         required: true
     },
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
     about: String,
     role: {
         type: Number,
-        trim:  true
+        trim: true
     },
     photo: {
         type: Buffer,
@@ -47,7 +47,39 @@ const userSchema = new mongoose.Schema({
         data: String,
         default: ''
     }
-    
+
 }, { timestamps: true });
+
+userSchema.virtual('password')
+    .set(function (password) {
+        //create temp variable _id
+        this._password = password;
+        //generate salt
+        this.salt = this.makeSalt();
+        //encrypt password
+        this.hashedPassword = this.encryptPassword(password);
+    })
+    .get(function () {
+        return this._password
+    });
+
+userSchema.methods = {
+    encryptPassword: function (password) {
+        if (!password) return '';
+        try {
+            return crypto.createHmac('sha1', this.salt)
+                .update(password)
+                .digest('hex')
+        } catch (err) {
+            return '';
+        }
+    },
+    makeSalt: function () {
+        return Math.round(new Date().valueOf * Math.random()) + '';
+    },
+    authenticate: function (plainPassword) {
+        return this.encryptPassword(plainPassword) === this.hashedPassword
+    }
+}
 
 module.exports = mongoose.model('User', userSchema);
