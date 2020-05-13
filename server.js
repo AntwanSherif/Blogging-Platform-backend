@@ -6,11 +6,14 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+//routes
+const blogRoutes = require('./routes/blog');
+
 //app
 const app = express();
 
 //db connect
-mongoose.connect(process.env.DB_URL, { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false })
+mongoose.connect(process.env.DB_URL, { useUnifiedTopology: true, useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false })
 .then(() => console.log('DB connected'));
 
 //middleware
@@ -23,10 +26,8 @@ if(process.env.NODE_ENV === 'development') {
     app.use(cors({ origin: `${process.env.CLIENT_URL}` }));
 }
 
-//routes
-app.get('/api', (req, res) => {
-    res.json({ time: new Date().toString()});
-});
+//routes middleware
+app.use('/api', blogRoutes);
 
 //port
 const port = process.env.PORT || 3001;
