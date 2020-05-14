@@ -75,7 +75,7 @@ userSchema.methods = {
         }
     },
     makeSalt: function () {
-        return Math.round(new Date().valueOf * Math.random()) + '';
+        return Math.round(new Date().valueOf() * Math.random()) + '';
     },
     authenticate: function (plainPassword) {
         return this.encryptPassword(plainPassword) === this.hashedPassword
